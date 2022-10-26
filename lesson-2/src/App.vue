@@ -1,7 +1,7 @@
 <template>
   <div id="app">
-    <input v-on:click="activateOperand(1)" type="number" v-model="operand1" />
-    <input v-on:click="activateOperand(2)" type="number" v-model="operand2" />
+    <input v-bind:class="{active: activeOperand == 1}" v-on:click="activateOperand(1)" type="number" v-model="operand1" />
+    <input v-bind:class="{active: activeOperand == 2}" v-on:click="activateOperand(2)" type="number" v-model="operand2" />
 
     <p>Результат: {{ result }} </p>
 
@@ -21,7 +21,8 @@
 
     <!-- клавиатура -->
     <div v-show="checked">
-      <button v-for="item, index of keyboard" v-bind:key="index" v-on:click="currentNumber = item">{{ item }}</button>
+      <button v-for="num of keyboard" v-bind:key="num" v-on:click="keyDown(num)">{{ num }}</button>
+      <button v-on:click="backspace">←</button>
     </div>
 
 
@@ -51,13 +52,12 @@ export default {
         '6',
         '7',
         '8',
-        '9',
-        '←',
+        '9'
       ],
       currentNumber: '0',
       activeOperand: 1,
-      operand1: 0,
-      operand2: 0,
+      operand1: '0',
+      operand2: '0',
       currentOperation: '+',
       error: '',
       operations: [  // список доступных операций
@@ -76,6 +76,24 @@ export default {
     }
   },
   methods: {
+    keyDown(num) {
+      if (this.activeOperand == 1) {
+        this.operand1 = this.operand1 == 0 ? '' : this.operand1     // чтобы не было 02
+        this.operand1 = String(this.operand1) + String(num)
+      } else if (this.activeOperand == 2) {
+        this.operand2 = this.operand2 == 0 ? '' : this.operand2
+        this.operand2 = String(this.operand2) + String(num)
+      }
+    },
+    backspace() {
+      if (this.activeOperand == 1) {
+        this.operand1 = this.operand1.slice(0,-1) 
+        this.operand1 = this.operand1 == '' ? '0' : this.operand1     // чтобы поставить 0 после backspace
+      } else if (this.activeOperand == 2) {
+        this.operand2 = this.operand2.slice(0,-1)
+        this.operand2 = this.operand2 == '' ? '0' : this.operand2
+      }
+    },
     activateOperand(id) {
       this.activeOperand = id;
     },
@@ -112,20 +130,6 @@ export default {
         default:
           break;
       }
-    },
-    writeNumber(number) {
-      switch (number) {
-        case "0":
-          return this.operand1 + Number('0');
-        case "1":
-          return this.operand1 + '1';
-        case "2":
-          return this.multiplication()
-        case "3":
-          return this.division()
-        default:
-          break;
-      }
     }
   }
 }
@@ -147,5 +151,9 @@ export default {
   padding: 10px 20px;
   display: block;
   margin: 20px 0;
+}
+
+.active {
+  border: 1px solid yellow;
 }
 </style>
